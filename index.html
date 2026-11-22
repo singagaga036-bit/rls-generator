@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Генератор РЛС СССР / РФ</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: radial-gradient(circle at 50% 0%, #0b2030 0%, #04101a 70%);
+    color: #d7e9f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px;
+  }
+  h1 { font-size: 26px; margin-bottom: 8px; text-align: center; }
+  .sub { color: #7fa3b8; margin-bottom: 28px; text-align: center; max-width: 520px; }
+  button {
+    background: #16a085;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+  }
+  button:hover { background: #1abc9c; }
+  button:active { transform: scale(0.97); }
+  .card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 28px;
+    max-width: 560px;
+    width: 100%;
+  }
+  .name { font-size: 24px; font-weight: 700; color: #ffd76e; }
+  .year { margin: 8px 0 14px; color: #7fd7c4; font-size: 15px; }
+  .desc { line-height: 1.6; }
+  .counter { margin-top: 18px; color: #55758a; font-size: 13px; }
+</style>
+</head>
+<body>
+  <h1>📡 Генератор РЛС СССР / РФ</h1>
+  <p class="sub">Нажми кнопку — и получи случайную радиолокационную станцию с краткой справкой</p>
+  <button id="genBtn">Сгенерировать РЛС</button>
+  <div class="card" id="card" hidden>
+    <div class="name" id="name"></div>
+    <div class="year" id="year"></div>
+    <div class="desc" id="desc"></div>
+  </div>
+  <div class="counter" id="counter"></div>
+<script>
+const stations = [
+  { name: 'П-12 «Енисей»', year: '1956', desc: 'Метровая РЛС обнаружения. Возили на двух грузовиках, антенна — большая решётка. Видела цели на 270 км и не боялась помех.' },
+  { name: 'П-14 «Лена»', year: '1958', desc: 'Мощная метровая РЛС раннего оповещения. Антенна размером с дом, обзор — тысячи километров. Шпионы вычисляли её местоположение со спутников.' },
+  { name: 'П-15 «Тропа»', year: '1955', desc: 'УКВ РЛС для ПВО. Компактная, на грузовике, с двумя антеннами-«корытами». Часто маскировали на вышках в лесу.' },
+  { name: 'П-15М «Сопка»', year: '1962', desc: 'Модернизированная «Тропа». Работала и с колёс, и со стационарной вышки.' },
+  { name: 'П-18 «Терек»', year: '1971', desc: 'Метровая мобильная РЛС. Хорошо видела самолёты, сделанные по «стелс»-технологиям.' },
+  { name: 'П-19 «Роста»', year: '1974', desc: 'Дециметровая РЛС. Дежурная подружка зенитных комплексов: подсказывала им цели.' },
+  { name: 'П-35 «Сатурн»', year: '1958', desc: 'РЛС кругового обзора на 300 км. Ставили и на прицепы, и на стационарные площадки.' },
+  { name: '1Л13 «Небо-СВ»', year: '1983', desc: 'Метровая РЛС для сухопутных войск. Ехала на гусеничном шасси вместе с армией.' },
+  { name: '55Ж6 «Небо»', year: '1991', desc: 'Трёхкоординатная метровая РЛС дальнего обнаружения. Большая антенна на четырёх опорах.' },
+  { name: '36Д6 «Тин Шилд»', year: '1982', desc: 'Подвижная 3D РЛС. Умеет измерять высоту целей, перевозится в контейнерах.' },
+  { name: '76Н6 «Клист Кап»', year: '1983', desc: 'Низковысотный обнаружитель для С-300. Ищет крылатые ракеты у самой земли.' },
+  { name: '64Л6 «Гамма-С1»', year: '1994', desc: 'Подвижная 3D РЛС. Задумана как дешёвая замена «Сатурна», разворачивается быстрее.' },
+  { name: '«Дуга»', year: '1976', desc: 'Загоризонтная РЛС слежения за стартами ракет. Пульсировала так, что радиолюбители всего мира прозвали её «Русский дятел».' },
+  { name: '«Днестр»', year: '1964', desc: 'Одна из первых советских РЛС предупреждения о ракетном нападении. Видела старты ракет за океаном.' },
+  { name: '«Днепр»', year: '1970-е', desc: 'Развитие «Днестра»: дальше, точнее, надёжнее. Дежурила в СССР, потом осталась в России и Беларуси.' },
+  { name: '«Дарьял»', year: '1984', desc: 'Гигантская стационарная РЛС противоракетной обороны. Отдельные приёмная и передающая антенны высотой с небоскрёб. Стояла в Печоре и Габале.' },
+  { name: '«Дон-2Н»', year: '1991', desc: 'РЛС обороны Москвы. Выглядит как огромная пирамида и смотрит во все стороны одновременно.' },
+  { name: '«Волга»', year: '2000-е', desc: 'РЛС предупреждения о ракетном нападении. Дежурила в Беларуси и под Петербургом.' },
+  { name: '«Воронеж»', year: '2010-е', desc: 'Семейство модульных РЛС («-ДМ», «-ВП», «-СМ»). Строится за 1–2 года вместо десяти лет.' },
+  { name: '«Контейнер»', year: '2019', desc: 'Загоризонтная РЛС нового поколения. Ловит самолёты и ракеты за тысячи километров, отражая сигнал от ионосферы.' },
+  { name: '«Фрегат»', year: '1970-е', desc: 'Корабельная РЛС обнаружения. Стояла на крейсерах и больших противолодочных кораблях ВМФ.' }
+];
+
+let lastIndex = -1;
+let shownCount = 0;
+const el = id => document.getElementById(id);
+
+function generate() {
+  if (stations.length === 0) return;
+  let i = Math.floor(Math.random() * stations.length);
+  if (stations.length > 1) {
+    while (i === lastIndex) {
+      i = Math.floor(Math.random() * stations.length);
+    }
+  }
+  lastIndex = i;
+  shownCount++;
+  const s = stations[i];
+  el('name').textContent = s.name;
+  el('year').textContent = 'Год создания: ' + s.year;
+  el('desc').textContent = s.desc;
+  el('card').hidden = false;
+  el('counter').textContent = 'В базе станций: ' + stations.length + ' · Показано: ' + shownCount;
+}
+
+el('genBtn').addEventListener('click', generate);
+generate();
+</script>
+</body>
+</html>
