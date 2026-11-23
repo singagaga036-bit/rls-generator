@@ -285,7 +285,8 @@ function addTarget() {
     speed: 1.6 + Math.random() * 1.4,
     trail: [],
     num: num,
-    bearing: 0
+    bearing: 0,
+    coolUntil: 0
   };
   t.bearing = bearingOf(t);
 
@@ -339,6 +340,7 @@ function step(t) {
 // ===== Развёртка: белый луч, оборот за 10 секунд (6 об/мин) =====
 const sweepEl = document.querySelector('.sweep');
 const PERIOD = 10000;
+const COOLDOWN = 8000;
 let lastAngle = 0;
 const t0 = performance.now();
 
@@ -349,8 +351,12 @@ function frame(now) {
   if (delta > 0 && delta < 90) {
     for (let i = 0; i < targets.length; i++) {
       const t = targets[i];
+      if (now < t.coolUntil) continue;
       const relPrev = (lastAngle - t.bearing + 360) % 360;
-      if (relPrev <= delta) step(t);
+      if (relPrev <= delta) {
+        step(t);
+        t.coolUntil = now + COOLDOWN;
+      }
     }
   }
   lastAngle = angle;
