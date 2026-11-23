@@ -50,13 +50,13 @@
     background: repeating-conic-gradient(from 0deg at center, rgba(46, 230, 168, 0.15) 0 0.6deg, transparent 0.6deg 30deg);
     pointer-events: none;
   }
-  .az { position: absolute; font-size: 11px; color: rgba(46, 230, 168, 0.55); letter-spacing: 0.1em; z-index: 4; }
+  .az { position: absolute; font-size: 11px; color: rgba(46, 230, 168, 0.55); letter-spacing: 0.1em; z-index: 5; }
   .az0 { top: 10px; left: 50%; transform: translateX(-50%); }
   .az90 { right: 12px; top: 50%; transform: translateY(-50%); }
   .az180 { bottom: 10px; left: 50%; transform: translateX(-50%); }
   .az270 { left: 12px; top: 50%; transform: translateY(-50%); }
 
-  /* ===== Луч: просто белая палка от центра к краю, без свечения ===== */
+  /* ===== Луч: просто белая палка из самого центра, без свечения ===== */
   .beam {
     position: absolute;
     left: calc(50% - 1px);
@@ -66,16 +66,16 @@
     background: #ffffff;
     transform-origin: 50% 100%;
     will-change: transform;
-    z-index: 1;
+    z-index: 4;
   }
 
-  /* ===== Мёртвая воронка посередине: отсюда идёт луч ===== */
+  /* ===== Мёртвая воронка посередине (на 1/3 меньше) ===== */
   .dead-zone {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 16%;
-    height: 16%;
+    width: 10.7%;
+    height: 10.7%;
     transform: translate(-50%, -50%);
     border-radius: 50%;
     background: #04120c;
@@ -276,7 +276,7 @@ const NS = 'http://www.w3.org/2000/svg';
 const svg = el('radar');
 const targets = [];
 let nextTrack = 0;
-const DEAD_R = 8; // радиус мёртвой воронки в центре
+const DEAD_R = 5.3; // радиус мёртвой воронки (на 1/3 меньше прежнего)
 
 function bearingOf(t) {
   return (Math.atan2(t.x - 50, 50 - t.y) * 180 / Math.PI + 360) % 360;
@@ -305,7 +305,7 @@ function addTarget() {
   const num = pad2(((nextTrack - 1) % 50) + 1);
   // цель появляется в любой точке радара, но вне мёртвой воронки
   const ang = Math.random() * Math.PI * 2;
-  const rad = DEAD_R + 2 + Math.random() * 35;
+  const rad = DEAD_R + 2 + Math.random() * 37;
   const t = {
     x: 50 + rad * Math.cos(ang),
     y: 50 + rad * Math.sin(ang),
@@ -371,7 +371,7 @@ function step(t) {
   draw(t);
 }
 
-// ===== Развёртка: белая палка-луч, оборот за 10 секунд (6 об/мин) =====
+// ===== Развёртка: белая палка-луч из центра, оборот за 10 секунд (6 об/мин) =====
 const beamEl = document.querySelector('.beam');
 const PERIOD = 10000;
 const COOLDOWN = 8000;
